@@ -11,6 +11,7 @@ import { initZenWasmOnce } from '@shared/jdm/init-zen-wasm'
 import { SAMPLE_SIMULATION_CONTEXT } from '../domain/starter-graph'
 import { toEditorGraph } from '../domain/ensure-node-positions'
 import { runJdmSimulation } from '../domain/run-jdm-simulation'
+import { runZenFunction } from '../domain/run-zen-function'
 import { isRecoverableGraphError } from './is-recoverable-graph-error'
 import type { JdmGraph } from '@shared/types/domain'
 
@@ -85,7 +86,9 @@ function SimulatorPanel({
         setLoading(true)
         try {
           await initZenWasmOnce()
-          onSimulation(runJdmSimulation(graph, context, evaluateExpression, evaluateUnaryExpression))
+          onSimulation(
+            runJdmSimulation(graph, context, evaluateExpression, evaluateUnaryExpression, runZenFunction),
+          )
         } catch (err) {
           onSimulation({
             error: {

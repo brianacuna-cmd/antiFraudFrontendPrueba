@@ -1,0 +1,41 @@
+{
+  "contentType": "application/vnd.gorules.decision",
+  "nodes": [
+    {
+      "id": "request",
+      "type": "inputNode",
+      "name": "Request",
+      "position": { "x": 60, "y": 180 }
+    },
+    {
+      "id": "table",
+      "type": "decisionTableNode",
+      "name": "FirstHit",
+      "position": { "x": 360, "y": 180 },
+      "content": {
+        "hitPolicy": "first",
+        "passThrough": false,
+        "inputs": [
+          { "id": "i1", "name": "Amount (cents)", "field": "amountCents" }
+        ],
+        "outputs": [
+          { "id": "o1", "name": "Score", "field": "riskScore" }
+        ],
+        "rules": [
+          { "_id": "r1", "i1": ">= 10000", "o1": "15" },
+          { "_id": "r2", "i1": ">= 1", "o1": "99" }
+        ]
+      }
+    },
+    {
+      "id": "response",
+      "type": "outputNode",
+      "name": "Response",
+      "position": { "x": 680, "y": 180 }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "sourceId": "request", "targetId": "table" },
+    { "id": "e2", "sourceId": "table", "targetId": "response" }
+  ]
+}

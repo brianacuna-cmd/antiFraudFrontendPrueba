@@ -1,0 +1,63 @@
+{
+  "contentType": "application/vnd.gorules.decision",
+  "nodes": [
+    {
+      "id": "request",
+      "type": "inputNode",
+      "name": "Request",
+      "position": { "x": 60, "y": 180 }
+    },
+    {
+      "id": "route",
+      "type": "switchNode",
+      "name": "Route",
+      "position": { "x": 340, "y": 180 },
+      "content": {
+        "hitPolicy": "first",
+        "statements": [
+          {
+            "id": "s-charge",
+            "condition": "providerEventType == \"CHARGEBACK\"",
+            "isDefault": false
+          },
+          {
+            "id": "s-default",
+            "condition": "",
+            "isDefault": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "charge",
+      "type": "expressionNode",
+      "name": "ChargebackScore",
+      "position": { "x": 640, "y": 80 },
+      "content": {
+        "expressions": [{ "id": "e-charge", "key": "riskScore", "value": "80" }]
+      }
+    },
+    {
+      "id": "other",
+      "type": "expressionNode",
+      "name": "OtherScore",
+      "position": { "x": 640, "y": 280 },
+      "content": {
+        "expressions": [{ "id": "e-other", "key": "riskScore", "value": "10" }]
+      }
+    },
+    {
+      "id": "response",
+      "type": "outputNode",
+      "name": "Response",
+      "position": { "x": 940, "y": 180 }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "sourceId": "request", "targetId": "route" },
+    { "id": "e2", "sourceId": "route", "targetId": "charge", "sourceHandle": "s-charge" },
+    { "id": "e3", "sourceId": "route", "targetId": "other", "sourceHandle": "s-default" },
+    { "id": "e4", "sourceId": "charge", "targetId": "response" },
+    { "id": "e5", "sourceId": "other", "targetId": "response" }
+  ]
+}
