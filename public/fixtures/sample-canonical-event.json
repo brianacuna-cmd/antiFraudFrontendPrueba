@@ -1,0 +1,14 @@
+{
+  "provider": "internal",
+  "providerEventType": "wallet.transfer",
+  "caseCustomerId": "cust-123",
+  "amountCents": 500000,
+  "currency": "USD",
+  "riskSignals": {
+    "walletAgeDays": 2,
+    "velocity24h": 9,
+    "destCountry": "XX",
+    "providerRiskScore": 90
+  },
+  "createdAt": "2026-08-18T00:00:00.000Z"
+}

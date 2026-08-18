@@ -38,6 +38,30 @@ describe('toEditorGraph', () => {
     expect(graph.edges[0]).toEqual({ id: 'e1', sourceId: 'request', targetId: 'score' })
   })
 
+  it('keeps Switch sourceHandle so reload/import still follows the branch', () => {
+    const graph = toEditorGraph({
+      contentType: JDM_CONTENT_TYPE,
+      nodes: [
+        { id: 'route', type: 'switchNode' },
+        { id: 'charge', type: 'expressionNode' },
+      ],
+      edges: [
+        {
+          id: 'e-branch',
+          sourceId: 'route',
+          targetId: 'charge',
+          sourceHandle: 's-charge',
+        },
+      ],
+    })
+    expect(graph.edges[0]).toEqual({
+      id: 'e-branch',
+      sourceId: 'route',
+      targetId: 'charge',
+      sourceHandle: 's-charge',
+    })
+  })
+
   it('drops nodes without an id so React Flow is not given holes', () => {
     const graph = toEditorGraph({
       contentType: JDM_CONTENT_TYPE,

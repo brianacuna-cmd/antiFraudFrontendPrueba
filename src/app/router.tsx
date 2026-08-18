@@ -38,6 +38,7 @@ function RuleEditRoute() {
 
   return (
     <RuleEditorContainer
+      draftKey={`edit:${ruleId}`}
       initialName={`Copy of ${data.name}`}
       initialGraph={data.conditions}
       onCreated={(newId) => navigate(`/rules/${newId}`)}
@@ -47,7 +48,7 @@ function RuleEditRoute() {
 
 function NewRuleRoute() {
   const navigate = useNavigate()
-  return <RuleEditorContainer onCreated={(newId) => navigate(`/rules/${newId}`)} />
+  return <RuleEditorContainer draftKey="new" onCreated={(newId) => navigate(`/rules/${newId}`)} />
 }
 
 function CasesListRoute() {

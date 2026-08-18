@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, ErrorBanner, FormField, Input } from '@shared/ui'
 import { JDM_CONTENT_TYPE, type JdmGraph } from '@shared/types/domain'
 import { useCreateDraftRule } from '../application/useRules'
 import { STARTER_GRAPH } from '../domain/starter-graph'
 import { toEditorGraph } from '../domain/ensure-node-positions'
 import { validateJdmOutput } from '../domain/validateJdmOutput'
+import { clearEditorDraft, loadEditorDraft, saveEditorDraft } from '../domain/editor-draft-storage'
 import type { DecisionGraphType } from '@gorules/jdm-editor'
 import { LazyJdmEditor } from './LazyJdmEditor'
 
@@ -21,14 +22,28 @@ export interface RuleEditorContainerProps {
   /** When provided, the submitted graph is prefilled from an existing rule, but always
    * submitted as a NEW draft rule — there is no update endpoint (spec risk-scoring-rules). */
   initialName?: string
+  /** sessionStorage key so an imported graph survives reload. `new` vs `edit:{ruleId}`. */
+  draftKey?: string
   onCreated?: (ruleId: string) => void
 }
 
-export function RuleEditorContainer({ initialGraph, initialName, onCreated }: RuleEditorContainerProps) {
-  const [graph, setGraph] = useState<JdmGraph>(() => toEditorGraph(initialGraph ?? STARTER_GRAPH))
-  const [name, setName] = useState(initialName ?? '')
+export function RuleEditorContainer({
+  initialGraph,
+  initialName,
+  draftKey = 'new',
+  onCreated,
+}: RuleEditorContainerProps) {
+  const [graph, setGraph] = useState<JdmGraph>(() => {
+    const draft = loadEditorDraft(draftKey)
+    return toEditorGraph(draft?.graph ?? initialGraph ?? STARTER_GRAPH)
+  })
+  const [name, setName] = useState(() => loadEditorDraft(draftKey)?.name ?? initialName ?? '')
   const [validationError, setValidationError] = useState<string | null>(null)
   const createDraft = useCreateDraftRule()
+
+  useEffect(() => {
+    saveEditorDraft(draftKey, { name, graph })
+  }, [draftKey, name, graph])
 
   function handleSubmit() {
     const result = validateJdmOutput(graph)
@@ -40,7 +55,10 @@ export function RuleEditorContainer({ initialGraph, initialName, onCreated }: Ru
     createDraft.mutate(
       { name, conditions: graph },
       {
-        onSuccess: (rule) => onCreated?.(rule.id),
+        onSuccess: (rule) => {
+          clearEditorDraft(draftKey)
+          onCreated?.(rule.id)
+        },
       },
     )
   }

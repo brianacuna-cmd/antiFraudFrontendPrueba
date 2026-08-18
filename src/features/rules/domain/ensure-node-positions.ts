@@ -16,15 +16,23 @@ function toPosition(node: JdmNode, index: number): { x: number; y: number } {
 }
 
 function toEdge(edge: JdmEdge, index: number): JdmEdge | null {
-  const rec = edge as JdmEdge & { source?: unknown; target?: unknown }
+  const rec = edge as JdmEdge & {
+    source?: unknown
+    target?: unknown
+    sourceHandle?: unknown
+    targetHandle?: unknown
+  }
   const sourceId = String(rec.sourceId ?? rec.source ?? '')
   const targetId = String(rec.targetId ?? rec.target ?? '')
   if (!sourceId || !targetId) return null
-  return {
+  const mapped: JdmEdge = {
     id: String(rec.id ?? `edge-${index}`),
     sourceId,
     targetId,
   }
+  if (typeof rec.sourceHandle === 'string' && rec.sourceHandle) mapped.sourceHandle = rec.sourceHandle
+  if (typeof rec.targetHandle === 'string' && rec.targetHandle) mapped.targetHandle = rec.targetHandle
+  return mapped
 }
 
 /**
