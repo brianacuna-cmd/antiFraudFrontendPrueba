@@ -27,7 +27,7 @@ export function LifecycleActions({ caseData }: LifecycleActionsProps) {
   const anyError = [startReview, resolve, archive, reassign, reopen].find((m) => m.isError)
 
   return (
-    <div>
+    <div className="af-lifecycle">
       <p>
         Status: <strong>{caseData.status}</strong>
         {caseData.assignedTo ? <span> · Assigned to: {String(caseData.assignedTo)}</span> : null}

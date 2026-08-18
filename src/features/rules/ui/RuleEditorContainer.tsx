@@ -1,11 +1,20 @@
 import { useState } from 'react'
-import { DecisionGraph, JdmConfigProvider } from '@gorules/jdm-editor'
 import { Button, ErrorBanner, FormField, Input } from '@shared/ui'
 import { JDM_CONTENT_TYPE, type JdmGraph } from '@shared/types/domain'
 import { useCreateDraftRule } from '../application/useRules'
+import { STARTER_GRAPH } from '../domain/starter-graph'
+import { toEditorGraph } from '../domain/ensure-node-positions'
 import { validateJdmOutput } from '../domain/validateJdmOutput'
+import type { DecisionGraphType } from '@gorules/jdm-editor'
+import { LazyJdmEditor } from './LazyJdmEditor'
 
-const EMPTY_GRAPH: JdmGraph = { contentType: JDM_CONTENT_TYPE, nodes: [], edges: [] }
+function toJdmGraph(value: DecisionGraphType): JdmGraph {
+  return toEditorGraph({
+    contentType: JDM_CONTENT_TYPE,
+    nodes: (value.nodes ?? []) as JdmGraph['nodes'],
+    edges: (value.edges ?? []) as JdmGraph['edges'],
+  })
+}
 
 export interface RuleEditorContainerProps {
   initialGraph?: JdmGraph
@@ -16,7 +25,7 @@ export interface RuleEditorContainerProps {
 }
 
 export function RuleEditorContainer({ initialGraph, initialName, onCreated }: RuleEditorContainerProps) {
-  const [graph, setGraph] = useState<JdmGraph>(initialGraph ?? EMPTY_GRAPH)
+  const [graph, setGraph] = useState<JdmGraph>(() => toEditorGraph(initialGraph ?? STARTER_GRAPH))
   const [name, setName] = useState(initialName ?? '')
   const [validationError, setValidationError] = useState<string | null>(null)
   const createDraft = useCreateDraftRule()
@@ -37,21 +46,31 @@ export function RuleEditorContainer({ initialGraph, initialName, onCreated }: Ru
   }
 
   return (
-    <div>
-      <FormField label="Rule name" htmlFor="rule-name">
-        <Input id="rule-name" value={name} onChange={(e) => setName(e.target.value)} />
-      </FormField>
-      <JdmConfigProvider>
-        <DecisionGraph
-          value={graph as unknown as import('@gorules/jdm-editor').DecisionGraphType}
-          onChange={(value) => setGraph(value as unknown as JdmGraph)}
-        />
-      </JdmConfigProvider>
+    <div className="af-editor-chrome">
+      <div className="af-editor-chrome__bar">
+        <FormField label="Rule name" htmlFor="rule-name">
+          <Input
+            id="rule-name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Wallet transfer risk v1"
+          />
+        </FormField>
+        <Button onClick={handleSubmit} disabled={createDraft.isPending}>
+          Save as draft
+        </Button>
+      </div>
+      <p className="af-lede">
+        Drag nodes from the left palette (Expression, Decision table, Function, Switch). Double-click a
+        node to open its editor. The graph must emit an integer <code>riskScore</code>. Use Simulator to
+        preview that expression against a sample event.
+      </p>
+      <LazyJdmEditor
+        value={graph as unknown as DecisionGraphType}
+        onChange={(value) => setGraph(toJdmGraph(value))}
+      />
       {validationError ? <ErrorBanner message={validationError} /> : null}
       {createDraft.isError ? <ErrorBanner message="Failed to save the rule draft" /> : null}
-      <Button onClick={handleSubmit} disabled={createDraft.isPending}>
-        Save as draft
-      </Button>
     </div>
   )
 }

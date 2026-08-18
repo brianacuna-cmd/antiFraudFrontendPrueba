@@ -27,6 +27,10 @@ export function SettingsScreen() {
 
   return (
     <form onSubmit={handleSubmit} aria-label="Settings">
+      <p className="af-lede">
+        These values are sent as <code>x-actor-user-id</code> and{' '}
+        <code>x-actor-organization-id</code> on every API call.
+      </p>
       <FormField label="User ID" htmlFor="userId" error={errors.userId}>
         <Input
           id="userId"

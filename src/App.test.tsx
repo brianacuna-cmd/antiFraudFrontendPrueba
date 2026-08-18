@@ -13,6 +13,7 @@ import { useSettingsStore } from '@shared/settings/settingsStore'
 vi.mock('@gorules/jdm-editor', () => ({
   JdmConfigProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DecisionGraph: () => <div data-testid="stub-graph" />,
+  GraphSimulator: () => <div data-testid="stub-simulator" />,
 }))
 
 const { default: App } = await import('./App')

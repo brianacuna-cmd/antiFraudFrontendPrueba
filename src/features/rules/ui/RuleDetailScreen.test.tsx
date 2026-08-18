@@ -9,6 +9,7 @@ import { JDM_CONTENT_TYPE, type JdmGraph } from '@shared/types/domain'
 vi.mock('@gorules/jdm-editor', () => ({
   JdmConfigProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DecisionGraph: () => <div data-testid="readonly-graph" />,
+  GraphSimulator: () => <div data-testid="stub-simulator" />,
 }))
 
 const { RuleDetailScreen } = await import('./RuleDetailScreen')
