@@ -30,6 +30,14 @@ describe('RulesListScreen', () => {
     expect(await screen.findByText('No rules yet')).toBeInTheDocument()
   })
 
+  it('offers a create action from the empty state', async () => {
+    server.use(http.get('/api/v1/risk-scoring-rules', () => HttpResponse.json({ items: [] })))
+    const onCreate = vi.fn()
+    renderScreen({ onCreate })
+    await userEvent.click(await screen.findByRole('button', { name: 'New rule' }))
+    expect(onCreate).toHaveBeenCalledTimes(1)
+  })
+
   it('lists rules with name and status, and selects one', async () => {
     server.use(http.get('/api/v1/risk-scoring-rules', () => HttpResponse.json({ items: [RULE] })))
     const onSelectRule = vi.fn()

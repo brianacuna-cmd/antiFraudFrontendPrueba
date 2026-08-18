@@ -1,6 +1,13 @@
 import '@testing-library/jest-dom/vitest'
-import { afterAll, afterEach, beforeAll } from 'vitest'
+import { afterAll, afterEach, beforeAll, vi } from 'vitest'
 import { server } from './mswServer'
+
+vi.mock('@gorules/zen-engine-wasm', () => ({
+  default: async () => undefined,
+  evaluateExpression: () => 90,
+  evaluateUnaryExpression: () => false,
+  isReady: () => true,
+}))
 
 // jsdom's built-in File/Blob/FormData do not implement the stream methods
 // that MSW's node interceptor (built on undici) needs to read a multipart

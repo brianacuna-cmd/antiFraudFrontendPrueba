@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { JDM_CONTENT_TYPE, type JdmGraph } from '@shared/types/domain'
+import { STARTER_GRAPH } from './starter-graph'
 import { validateJdmOutput } from './validateJdmOutput'
 
 function graphWith(nodes: JdmGraph['nodes']): JdmGraph {
@@ -50,5 +51,9 @@ describe('validateJdmOutput', () => {
   it('rejects null/undefined graphs', () => {
     expect(validateJdmOutput(null).valid).toBe(false)
     expect(validateJdmOutput(undefined).valid).toBe(false)
+  })
+
+  it('accepts the starter scoring template', () => {
+    expect(validateJdmOutput(STARTER_GRAPH)).toEqual({ valid: true })
   })
 })
