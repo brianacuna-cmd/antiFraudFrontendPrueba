@@ -1,0 +1,30 @@
+{
+  "contentType": "application/vnd.gorules.decision",
+  "nodes": [
+    {
+      "id": "request",
+      "type": "inputNode",
+      "name": "Request",
+      "position": { "x": 60, "y": 180 }
+    },
+    {
+      "id": "fn",
+      "type": "functionNode",
+      "name": "ScoreFn",
+      "position": { "x": 360, "y": 180 },
+      "content": {
+        "source": "export const handler = (input) => ({\n  riskScore: input.amountCents >= 10000 ? 42 : 5\n})"
+      }
+    },
+    {
+      "id": "response",
+      "type": "outputNode",
+      "name": "Response",
+      "position": { "x": 680, "y": 180 }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "sourceId": "request", "targetId": "fn" },
+    { "id": "e2", "sourceId": "fn", "targetId": "response" }
+  ]
+}

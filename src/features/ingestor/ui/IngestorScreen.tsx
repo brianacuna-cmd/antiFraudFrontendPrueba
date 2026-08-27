@@ -69,6 +69,7 @@ export function IngestorScreen() {
         <FormField label="CanonicalRiskEvent JSON" htmlFor="event-json">
           <textarea
             id="event-json"
+            className="af-textarea"
             value={jsonText}
             onChange={(e) => setJsonText(e.target.value)}
             rows={12}

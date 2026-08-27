@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { JDM_CONTENT_TYPE, type JdmGraph } from '@shared/types/domain'
+import { STARTER_GRAPH } from './starter-graph'
 import { validateJdmOutput } from './validateJdmOutput'
 
 function graphWith(nodes: JdmGraph['nodes']): JdmGraph {
@@ -50,5 +51,35 @@ describe('validateJdmOutput', () => {
   it('rejects null/undefined graphs', () => {
     expect(validateJdmOutput(null).valid).toBe(false)
     expect(validateJdmOutput(undefined).valid).toBe(false)
+  })
+
+  it('accepts the starter scoring template', () => {
+    expect(validateJdmOutput(STARTER_GRAPH)).toEqual({ valid: true })
+  })
+
+  it('accepts a function node whose source emits riskScore', () => {
+    const graph = graphWith([
+      { id: 'req', type: 'inputNode' },
+      {
+        id: 'fn',
+        type: 'functionNode',
+        content: { source: 'export const handler = (input) => ({ riskScore: 42 })' },
+      },
+      { id: 'res', type: 'outputNode' },
+    ])
+    expect(validateJdmOutput(graph)).toEqual({ valid: true })
+  })
+
+  it('accepts a decision table whose output field is riskScore', () => {
+    const graph = graphWith([
+      { id: 'req', type: 'inputNode' },
+      {
+        id: 'table',
+        type: 'decisionTableNode',
+        content: { outputs: [{ id: 'o1', field: 'riskScore' }] },
+      },
+      { id: 'res', type: 'outputNode' },
+    ])
+    expect(validateJdmOutput(graph)).toEqual({ valid: true })
   })
 })
