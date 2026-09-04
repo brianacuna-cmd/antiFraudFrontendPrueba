@@ -30,23 +30,24 @@ function usePrefersDark(): boolean {
 
 class GraphErrorBoundary extends Component<
   { children: ReactNode; resetKey: number; onRetry: () => void },
-  { failed: boolean; recoverKey: number }
+  { failed: boolean; recoverKey: number; message: string }
 > {
-  state = { failed: false, recoverKey: 0 }
+  state = { failed: false, recoverKey: 0, message: '' }
 
-  static getDerivedStateFromError(error: Error): { failed: boolean } {
-    return { failed: !isRecoverableGraphError(error) }
+  static getDerivedStateFromError(error: Error): { failed: boolean; message: string } | { failed: boolean } {
+    if (isRecoverableGraphError(error)) return { failed: false }
+    return { failed: true, message: error.message }
   }
 
   componentDidCatch(error: Error, _info: ErrorInfo) {
     if (isRecoverableGraphError(error)) {
-      this.setState((s) => ({ failed: false, recoverKey: s.recoverKey + 1 }))
+      this.setState((s) => ({ failed: false, recoverKey: s.recoverKey + 1, message: '' }))
     }
   }
 
   componentDidUpdate(prevProps: { resetKey: number }) {
     if (prevProps.resetKey !== this.props.resetKey && this.state.failed) {
-      this.setState({ failed: false })
+      this.setState({ failed: false, message: '' })
     }
   }
 
@@ -54,7 +55,10 @@ class GraphErrorBoundary extends Component<
     if (this.state.failed) {
       return (
         <div>
-          <p className="af-lede">The graph editor hit a rendering error.</p>
+          <p className="af-lede">
+            The graph editor hit a rendering error
+            {this.state.message ? `: ${this.state.message}` : '.'}
+          </p>
           <button type="button" className="af-button" onClick={this.props.onRetry}>
             Reload canvas
           </button>

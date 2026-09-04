@@ -511,6 +511,40 @@ form[aria-label='Mini ingestor'] .af-form-field:last-of-type {
   font-weight: 600;
 }
 
+.af-agent-brief {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+}
+
+.af-agent-brief h3 {
+  margin: 0 0 8px;
+}
+
+.af-agent-brief p {
+  color: var(--text-muted);
+}
+
+.af-agent-brief__body {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-h);
+}
+
+.af-timeline-brief {
+  display: block;
+  margin-top: 4px;
+  white-space: pre-wrap;
+  color: var(--text);
+  font-weight: 400;
+}
+
 .af-lifecycle {
   display: flex;
   flex-wrap: wrap;
@@ -645,6 +679,30 @@ form[aria-label='Mini ingestor'] .af-form-field:last-of-type {
 
 .af-editor-chrome__bar .af-button {
   margin: 0;
+}
+
+.af-editor-chrome__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.af-file-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ant-message,
+.ant-notification {
+  z-index: 11000;
 }
 
 .af-jdm {

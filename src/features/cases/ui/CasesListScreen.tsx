@@ -67,6 +67,12 @@ export function CasesListScreen({ onSelectCase }: CasesListScreenProps) {
               { key: 'status', header: 'Status', render: (c) => c.status },
               { key: 'priority', header: 'Priority', render: (c) => c.priority ?? '—' },
               { key: 'riskScore', header: 'Score', render: (c) => c.riskScore ?? '—' },
+              {
+                key: 'agentBrief',
+                header: 'Agent brief',
+                render: (c) =>
+                  c.agentBrief ? (c.agentBrief.length > 80 ? `${c.agentBrief.slice(0, 80)}…` : c.agentBrief) : '—',
+              },
             ]}
           />
           <p data-testid="cases-total">Total: {data.total}</p>

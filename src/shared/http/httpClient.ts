@@ -30,6 +30,9 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   const headers: Record<string, string> = {}
   if (userId) headers['x-actor-user-id'] = userId
   if (organizationId) headers['x-actor-organization-id'] = organizationId
+  // Demo trusted-header actor is SUPERVISOR so fraud-config / rules / ingest
+  // writes are not 403 role "null". Backend also defaults USER to SUPERVISOR.
+  if (userId) headers['x-actor-role-id'] = 'SUPERVISOR'
 
   let body: BodyInit | undefined
   if (options.isFormData) {

@@ -125,12 +125,17 @@ export interface Case {
   status: CaseStatus
   priority?: Priority
   riskScore?: number
+  agentBrief?: string | null
   [key: string]: unknown
 }
 
 export interface TimelineEvent {
   id: string
-  type: string
+  eventType?: string
+  type?: string
+  newValue?: string | null
+  previousValue?: string | null
+  createdBy?: string | null
   createdAt: string
   [key: string]: unknown
 }

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Button, ErrorBanner, FormField, Input } from '@shared/ui'
 import { JDM_CONTENT_TYPE, type JdmGraph } from '@shared/types/domain'
 import { useCreateDraftRule } from '../application/useRules'
 import { STARTER_GRAPH } from '../domain/starter-graph'
 import { toEditorGraph } from '../domain/ensure-node-positions'
+import { parseImportedJdm } from '../domain/parse-imported-jdm'
 import { validateJdmOutput } from '../domain/validateJdmOutput'
 import { clearEditorDraft, loadEditorDraft, saveEditorDraft } from '../domain/editor-draft-storage'
 import type { DecisionGraphType } from '@gorules/jdm-editor'
@@ -39,11 +40,30 @@ export function RuleEditorContainer({
   })
   const [name, setName] = useState(() => loadEditorDraft(draftKey)?.name ?? initialName ?? '')
   const [validationError, setValidationError] = useState<string | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [canvasNonce, setCanvasNonce] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const createDraft = useCreateDraftRule()
 
   useEffect(() => {
     saveEditorDraft(draftKey, { name, graph })
   }, [draftKey, name, graph])
+
+  async function handleImportFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const text = await file.text()
+    const result = parseImportedJdm(text)
+    if (!result.ok) {
+      setImportError(result.error)
+      return
+    }
+    setImportError(null)
+    setValidationError(null)
+    setGraph(result.graph)
+    setCanvasNonce((n) => n + 1)
+  }
 
   function handleSubmit() {
     const result = validateJdmOutput(graph)
@@ -74,19 +94,35 @@ export function RuleEditorContainer({
             placeholder="Wallet transfer risk v1"
           />
         </FormField>
-        <Button onClick={handleSubmit} disabled={createDraft.isPending}>
-          Save as draft
-        </Button>
+        <div className="af-editor-chrome__actions">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="af-file-hidden"
+            aria-label="Load JDM JSON"
+            onChange={handleImportFile}
+          />
+          <Button type="button" variant="secondary" onClick={() => fileInputRef.current?.click()}>
+            Load JSON
+          </Button>
+          <Button onClick={handleSubmit} disabled={createDraft.isPending}>
+            Save as draft
+          </Button>
+        </div>
       </div>
       <p className="af-lede">
         Drag nodes from the left palette (Expression, Decision table, Function, Switch). Double-click a
-        node to open its editor. The graph must emit an integer <code>riskScore</code>. Use Simulator to
-        preview that expression against a sample event.
+        node to open its editor. Use <strong>Load JSON</strong> for a GoRules JDM file (
+        <code>contentType: application/vnd.gorules.decision</code>). The graph must emit an integer{' '}
+        <code>riskScore</code>. Use Simulator to preview that expression against a sample event.
       </p>
       <LazyJdmEditor
+        key={canvasNonce}
         value={graph as unknown as DecisionGraphType}
         onChange={(value) => setGraph(toJdmGraph(value))}
       />
+      {importError ? <ErrorBanner message={importError} /> : null}
       {validationError ? <ErrorBanner message={validationError} /> : null}
       {createDraft.isError ? <ErrorBanner message="Failed to save the rule draft" /> : null}
     </div>

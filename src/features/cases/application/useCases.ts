@@ -32,6 +32,7 @@ export function useListCases(filters: CaseFilters) {
   return useQuery<CasesListResult, Error>({
     queryKey: casesListKey(filters),
     queryFn: () => listCases(filters),
+    refetchInterval: 4000,
   })
 }
 
@@ -40,6 +41,7 @@ export function useCaseDetail(caseId: string | undefined) {
     queryKey: caseId ? caseDetailKey(caseId) : ['cases', 'detail', 'unknown'],
     queryFn: () => getCaseDetail(caseId as string),
     enabled: Boolean(caseId),
+    refetchInterval: (query) => (query.state.data?.agentBrief ? false : 4000),
   })
 }
 
@@ -48,6 +50,7 @@ export function useTimeline(caseId: string | undefined) {
     queryKey: caseId ? caseTimelineKey(caseId) : ['cases', 'timeline', 'unknown'],
     queryFn: () => getTimeline(caseId as string),
     enabled: Boolean(caseId),
+    refetchInterval: 4000,
   })
 }
 
