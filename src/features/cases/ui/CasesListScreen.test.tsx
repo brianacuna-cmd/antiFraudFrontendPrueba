@@ -18,13 +18,23 @@ describe('CasesListScreen', () => {
       http.get('/api/v1/cases', ({ request }) => {
         capturedUrl = request.url
         return HttpResponse.json({
-          items: [{ id: 'c1', organizationId: 'org1', status: 'OPEN', priority: 'HIGH', riskScore: 82 }],
+          items: [
+            {
+              id: 'c1',
+              organizationId: 'org1',
+              status: 'OPEN',
+              priority: 'HIGH',
+              riskScore: 82,
+              agentBrief: 'New wallet, high velocity.',
+            },
+          ],
           total: 1,
         })
       }),
     )
     renderScreen()
     expect(await screen.findByText('Total: 1')).toBeInTheDocument()
+    expect(screen.getByText('New wallet, high velocity.')).toBeInTheDocument()
     expect(capturedUrl).toContain('limit=20')
     expect(capturedUrl).toContain('offset=0')
   })

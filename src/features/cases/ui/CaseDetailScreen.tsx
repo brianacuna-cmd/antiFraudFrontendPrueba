@@ -8,17 +8,27 @@ export interface CaseDetailScreenProps {
   caseId: string
 }
 
+function timelineType(event: { eventType?: string; type?: string }): string {
+  return event.eventType ?? event.type ?? 'UNKNOWN'
+}
+
 function TimelineTab({ caseId }: { caseId: string }) {
   const { data, isLoading } = useTimeline(caseId)
   if (isLoading) return <p>Loading…</p>
   if (!data || data.items.length === 0) return <p>No timeline events yet.</p>
   return (
     <ul>
-      {data.items.map((event) => (
-        <li key={event.id}>
-          {event.type} — {event.createdAt}
-        </li>
-      ))}
+      {data.items.map((event) => {
+        const type = timelineType(event)
+        return (
+          <li key={event.id}>
+            {type} — {event.createdAt}
+            {type === 'AGENT_BRIEFING' && event.newValue ? (
+              <span className="af-timeline-brief">{event.newValue}</span>
+            ) : null}
+          </li>
+        )
+      })}
     </ul>
   )
 }
@@ -74,6 +84,15 @@ export function CaseDetailScreen({ caseId }: CaseDetailScreenProps) {
         <dt>SLA due</dt>
         <dd>{(caseData.slaDueAt as string | undefined) ?? '—'}</dd>
       </dl>
+
+      <section className="af-agent-brief" aria-labelledby="agent-brief-heading">
+        <h3 id="agent-brief-heading">Agent brief</h3>
+        {caseData.agentBrief ? (
+          <p className="af-agent-brief__body">{caseData.agentBrief}</p>
+        ) : (
+          <p>No agent brief yet. It appears here after the companion writes to this case.</p>
+        )}
+      </section>
 
       <LifecycleActions caseData={caseData} />
 

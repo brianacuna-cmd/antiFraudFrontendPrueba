@@ -32,20 +32,61 @@ describe('CaseDetailScreen', () => {
     expect(await screen.findByText('82')).toBeInTheDocument()
     expect(screen.getByText('HIGH')).toBeInTheDocument()
     expect(screen.getByText('2026-08-19T00:00:00.000Z')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Agent brief' })).toBeInTheDocument()
+    expect(screen.getByText(/No agent brief yet/)).toBeInTheDocument()
+  })
+
+  it('renders the stored agent brief', async () => {
+    server.use(
+      http.get('/api/v1/cases/c1', () =>
+        HttpResponse.json({ ...CASE, agentBrief: 'Wallet looks newly created; review destination XX.' }),
+      ),
+      http.get('/api/v1/cases/c1/timeline', () => HttpResponse.json({ items: [] })),
+      http.get('/api/v1/cases/c1/notes', () => HttpResponse.json({ items: [] })),
+      http.get('/api/v1/cases/c1/evidence', () => HttpResponse.json({ items: [] })),
+    )
+    renderScreen()
+    expect(await screen.findByText('Wallet looks newly created; review destination XX.')).toBeInTheDocument()
   })
 
   it('renders timeline items in the Timeline tab', async () => {
     server.use(
       http.get('/api/v1/cases/c1', () => HttpResponse.json(CASE)),
       http.get('/api/v1/cases/c1/timeline', () =>
-        HttpResponse.json({ items: [{ id: 't1', type: 'CASE_OPENED', createdAt: '2026-01-01T00:00:00.000Z' }] }),
+        HttpResponse.json({
+          items: [{ id: 't1', eventType: 'CASE_CREATED', createdAt: '2026-01-01T00:00:00.000Z' }],
+        }),
       ),
       http.get('/api/v1/cases/c1/notes', () => HttpResponse.json({ items: [] })),
       http.get('/api/v1/cases/c1/evidence', () => HttpResponse.json({ items: [] })),
     )
     renderScreen()
     await screen.findByText('82')
-    expect(await screen.findByText(/CASE_OPENED/)).toBeInTheDocument()
+    expect(await screen.findByText(/CASE_CREATED/)).toBeInTheDocument()
+  })
+
+  it('shows AGENT_BRIEFING text from timeline newValue', async () => {
+    server.use(
+      http.get('/api/v1/cases/c1', () => HttpResponse.json({ ...CASE, agentBrief: 'brief body' })),
+      http.get('/api/v1/cases/c1/timeline', () =>
+        HttpResponse.json({
+          items: [
+            {
+              id: 't2',
+              eventType: 'AGENT_BRIEFING',
+              newValue: 'brief body',
+              createdAt: '2026-01-01T00:00:01.000Z',
+            },
+          ],
+        }),
+      ),
+      http.get('/api/v1/cases/c1/notes', () => HttpResponse.json({ items: [] })),
+      http.get('/api/v1/cases/c1/evidence', () => HttpResponse.json({ items: [] })),
+    )
+    renderScreen()
+    await screen.findByText('brief body')
+    await userEvent.click(screen.getByRole('tab', { name: 'Timeline' }))
+    expect(await screen.findByText(/AGENT_BRIEFING/)).toBeInTheDocument()
   })
 
   it('adds a note via the Notes tab', async () => {

@@ -103,6 +103,39 @@ describe('RuleEditorContainer', () => {
     expect(onCreated).toHaveBeenCalledWith('r1')
   })
 
+  it('shows why a JSON file cannot be loaded', async () => {
+    renderContainer({ initialGraph: EMPTY_GRAPH })
+    const file = new File(['{ not json'], 'broken.json', { type: 'application/json' })
+    await userEvent.upload(screen.getByLabelText('Load JDM JSON'), file)
+    expect(await screen.findByRole('alert')).toHaveTextContent(/not valid JSON/i)
+  })
+
+  it('loads a JDM JSON file onto the canvas (save uses imported graph)', async () => {
+    mockCreateDraft()
+    const onCreated = vi.fn()
+    renderContainer({ initialGraph: EMPTY_GRAPH, onCreated })
+    const graph = {
+      contentType: JDM_CONTENT_TYPE,
+      nodes: [
+        { id: 'req', type: 'inputNode' },
+        {
+          id: 'expr',
+          type: 'expressionNode',
+          content: { expressions: [{ key: 'riskScore', value: '50' }] },
+        },
+        { id: 'res', type: 'outputNode' },
+      ],
+      edges: [],
+    }
+    const file = new File([JSON.stringify(graph)], 'rule.json', { type: 'application/json' })
+    await userEvent.upload(screen.getByLabelText('Load JDM JSON'), file)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    await userEvent.type(screen.getByLabelText('Rule name'), 'Imported')
+    await userEvent.click(screen.getByRole('button', { name: 'Save as draft' }))
+    await screen.findByRole('button', { name: 'Save as draft' })
+    expect(onCreated).toHaveBeenCalledWith('r1')
+  })
+
   it('restores name and imported graph after remount (reload)', async () => {
     mockCreateDraft()
     const { unmount } = renderContainer({ draftKey: 'new', initialGraph: EMPTY_GRAPH })

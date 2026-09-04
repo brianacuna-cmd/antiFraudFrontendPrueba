@@ -24,6 +24,7 @@ describe('httpClient', () => {
     await httpClient.get('/organization-fraud-config')
     expect(receivedHeaders?.get('x-actor-user-id')).toBe(USER_ID)
     expect(receivedHeaders?.get('x-actor-organization-id')).toBe(ORG_ID)
+    expect(receivedHeaders?.get('x-actor-role-id')).toBe('SUPERVISOR')
   })
 
   it('maps 401 to AuthError', async () => {
